@@ -1557,8 +1557,6 @@ def update_round1_seeding():
         # Handle exceptions here
         return jsonify({"success": False, "error": str(e)}), 500
 
-
-
 @app.route('/update_round1_seeding_female', methods=['POST'])
 def update_round1_seeding_female():
     data = request.json
@@ -2044,7 +2042,7 @@ def get_seeding_structure(total_riders):
             'Heat 3': [9, 11, 13, 16]
         }
     else:
-        return None
+        return {}
 
 @app.route('/submit_rep_results', methods=['POST'])
 def submit_rep_results():
@@ -3368,6 +3366,9 @@ def get_sprint_category_format(sprint_category):
 
 
 
+from flask import render_template
+from sqlalchemy.orm import sessionmaker
+
 @app.route('/live')
 def live():
     Session = sessionmaker(bind=engine)
@@ -3378,17 +3379,32 @@ def live():
     # Assign sprint categories
     sprint_categories = assign_sprint_categories(len(riders))
 
-    pairings = generate_round1_pairings(riders, sprint_categories)
+    # Generate round 1 pairings
+    round1_pairings = generate_round1_pairings(riders, sprint_categories)
+    
+    # Fetch rep1 pairings using the logic from /rep1 route
+    with engine.connect() as connection:
+        all_rep_pairings = {}
+        sprint_categories_for_rep1 = connection.execute(
+            text("SELECT DISTINCT sprint_category FROM riders_male WHERE round_1_seeding IS NOT NULL")
+        ).fetchall()
+        
+        for category in sprint_categories_for_rep1:
+            riders_for_reps = connection.execute(
+                text("SELECT rider_name, round_1_seeding FROM riders_male WHERE sprint_category = :sprint_category AND signed_on = 'Yes' ORDER BY round_1_seeding DESC"),
+                {"sprint_category": category[0]}
+            ).fetchall()
+            total_riders_in_category = len(riders_for_reps)
+            rep_heats = get_seeding_structure(total_riders_in_category)
+            all_rep_pairings[category[0]] = rep_heats
 
-    global round1_heat_to_positions  # Declare as global
+    global round1_heat_to_positions
     if not round1_heat_to_positions:
-        # Assuming you have a default category for round 1
-        category = "default_category"  # Replace with your actual logic to determine category
+        category = "default_category"
         total_riders_in_category = get_riders_count_in_category(category)
         round1_heat_to_positions = get_round1_heat_to_positions(total_riders_in_category)
 
-    return render_template('live.html', pairings=pairings, sprint_categories=sprint_categories)
-
+    return render_template('live.html', round1_pairings=round1_pairings, rep_pairings=all_rep_pairings, sprint_categories=sprint_categories)
 
 
 if __name__ == '__main__':

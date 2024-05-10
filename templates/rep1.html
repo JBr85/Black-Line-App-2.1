@@ -120,7 +120,7 @@
       background-color: #f5cb05; /* New hover color */
     }
   </style>
-  <h1>Repechage Round 1</h1>
+  <h1>Repechage 1</h1>
 
   {% for sprint_category, heats in rep_pairings.items() %}
     <h2>Repechage Sprint {{ sprint_category }}</h2>
@@ -128,39 +128,36 @@
       <table class="table" id="repechageSprint{{ sprint_category }}Table">
         <thead>
           <tr>
-            <th class="heat">Heat</th>
-            <th class="rider-1">Rider 1</th>
-            <th class="col-v"></th>
-            <th class="rider-2">Rider 2</th>
-            <th class="col-v"></th>
-            <th class="rider-3">Rider 3</th>
-            <th class="col-v"></th>
-            <th class="rider-4">Rider 4</th>
-            <th class="col-v"></th>
-            <th class="rider-5">Rider 5</th>
-            <th class="submit">Submit Result</th>
+            <th class="heat" style="width: 10%;">Heat</th>
+            <th class="rider" style="width: 18%;">Rider 1</th>
+            <th class="col-v" style="width: 5%;"></th>
+            <th class="rider" style="width: 18%;">Rider 2</th>
+            <th class="col-v" style="width: 5%;"></th>
+            <th class="rider" style="width: 18%;">Rider 3</th>
+            <th class="col-v" style="width: 5%;"></th>
+            <th class="rider" style="width: 18%;">Rider 4</th>
+            <th class="submit" style="width: 10%;">Submit</th>
           </tr>
         </thead>
         <tbody>
           {% for heat, riders in heats.items() %}
             <tr>
               <td class="heat">Heat {{ loop.index }}</td>
-              {% for rider in riders %}
-                {% if rider != "BYE" %}
-                  <td onclick="selectRider(this, 'repechageSprint{{ sprint_category }}Table')">
-                    {{ rider }}
-                  </td>
+              {% for i in range(4) %}
+                {% if i < riders|length %}
+                  {% if riders[i] != "BYE" %}
+                    <td class="rider" onclick="selectRider(this, 'repechageSprint{{ sprint_category }}Table')">
+                      {{ riders[i] }}
+                    </td>
+                  {% else %}
+                    <td class="rider"></td>
+                  {% endif %}
                 {% else %}
-                  <td></td>
+                  <td class="rider"></td>
                 {% endif %}
-                {% if not loop.last %}
+                {% if not loop.last and i < 3 %}
                   <td class="col-v">V</td>
                 {% endif %}
-              {% endfor %}
-              <!-- Fill up the table to make sure every row has a consistent number of columns -->
-              {% set num_filled_cells = 2 * riders|length %}
-              {% for _ in range(num_filled_cells, 10) %}
-                <td></td>
               {% endfor %}
               <td class="submit">
                 <button type="button" onclick="confirmResult(this)">Submit</button>

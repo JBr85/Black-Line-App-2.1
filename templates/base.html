@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+      crossorigin="anonymous"
+    />
+
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+
+    <title>{% block title %}Home{% endblock %}</title>
+
+    <style>
+      /* Custom styles for the table and print */
+      .logo {
+        float: right;
+        max-width: 150px;
+        margin-top: -50px;
+        margin-right: 20px;
+      }
+
+      .print-button {
+        display: block;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .print-button:hover {
+        background-color: #0056b3;
+      }
+
+      /* Prevent table header from breaking onto new pages */
+      thead.no-break {
+        display: table-row-group;
+      }
+
+      tr {
+        page-break-inside: avoid;
+      }
+
+      @media print {
+        tr#female-title {
+          page-break-before: always; /* Page break at the title "Female Riders" */
+        }
+
+        .print-hide {
+          display: none;
+        }
+      }
+
+      @page {
+        margin: 0.5in; /* smaller margins */
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Just an image -->
+    <nav class="navbar navbar-dark bg-light print-hide">
+      <a class="navbar-brand" href="#">
+        <img
+          src="https://blacklinecoaching.com/wp-content/uploads/2019/12/BlackLine.gif"
+          width="100%"
+          height="100%"
+          class="align-right"
+          alt=""
+        />
+      </a>
+    </nav>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbar"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar">
+        <div class="navbar-nav">
+          <a class="nav-item nav-link" id="home" href="/">Home</a>
+          <a class="nav-item nav-link" id="signon_male" href="/signon_male">Male Riders Sign On</a>
+          <a class="nav-item nav-link" id="signon_female" href="/signon_female">Female Riders Sign On</a>
+          <a class="nav-item nav-link" id="Qualifying" href="/qualifying">Qualifying Page</a>
+          <a class="nav-item nav-link" id="qualifying_results" href="/qualifying_results">Qualifying Results</a>
+          
+          <!-- Dropdown For Round 1 -->
+          <div class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownRound1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Round 1
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownRound1">
+              <a class="dropdown-item" href="/round1">Open</a>
+              <a class="dropdown-item" href="/round1_female">Female</a>
+            </div>
+          </div>
+          
+          <!-- Dropdown For Repecharge 1 -->
+          <div class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownRep1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Repecharge 1
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownRep1">
+              <a class="dropdown-item" href="/rep1">Open</a>
+              <a class="dropdown-item" href="/rep1_female">Female</a>
+            </div>
+          </div>
+          
+          <!-- Dropdown For Quarter Finals -->
+          <div class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownQuarterFinals" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Quarter Finals
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownQuarterFinals">
+              <a class="dropdown-item" href="/quarter_finals">Open</a>
+              <a class="dropdown-item" href="/quarter_finals_female">Female</a>
+            </div>
+          </div>
+          
+          <!-- Dropdown For Minor Finals 1 -->
+          <div class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMinorFinals1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Minor Finals 1
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownMinorFinals1">
+              <a class="dropdown-item" href="/minorfinals1">Open</a>
+              <a class="dropdown-item" href="/minorfinals1_female">Female</a>
+            </div>
+          </div>
+      
+          <!-- Dropdown For Semi Finals -->
+          <div class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSemiFinal" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Semi Finals
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownSemiFinal">
+              <a class="dropdown-item" href="/semifinal">Open</a>
+              <a class="dropdown-item" href="/semifinal_female">Female</a>
+            </div>
+          </div>
+      
+          <!-- Dropdown For Minor Finals 2 -->
+          <div class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMinorFinals2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Minor Finals 2
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownMinorFinals2">
+              <a class="dropdown-item" href="/minorfinals2">Open</a>
+              <a class="dropdown-item" href="/minorfinals2_female">Female</a>
+            </div>
+          </div>
+      
+          <!-- Dropdown For Finals -->
+          <div class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFinals" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Finals
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownFinals">
+              <a class="dropdown-item" href="/finals">Open</a>
+              <a class="dropdown-item" href="/finals_female">Female</a>
+            </div>
+          </div>
+      
+          <!-- Other Links -->
+          <a class="nav-item nav-link" id="Live" href="/live">Live</a>
+          <a class="nav-item nav-link" id="Final Results" href="/final_results">Final Results</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">{% block content %}{% endblock %}</div>
+
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
+

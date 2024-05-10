@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Round 1 Pairings{% endblock %}
+
+{% block content %}
+  <style>
+    /* Custom styles for the table */
+    table.table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    table.table thead {
+      background-color: #f8f9fa;
+    }
+
+    table.table th,
+    table.table td {
+      padding: 8px;
+      text-align: center;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    table.table th.col-v,
+    table.table td.col-v,
+    table.table th.col-rider-2,
+    table.table td.col-rider-2,
+    table.table th.col-rider-3,
+    table.table td.col-rider-3 {
+      padding-left: 4px; /* Adjust as necessary */
+      margin-left: 0px; /* Adjust as necessary */
+    }
+
+    table.table th {
+      font-weight: bold;
+    }
+
+    table.table td {
+      vertical-align: top;
+    }
+
+    table.table td.rider-1,
+    table.table td.rider-2,
+    table.table td.rider-3 {
+      text-align: center;
+    }
+
+    .selected-1 {
+      background-color: #A8E6CF;  /* Modern light green */
+      border: 2px solid white;
+      border-radius: 8px;
+      position: relative;  /* To position the number correctly */
+    }
+    
+    .selected-2 {
+      background-color: #AEDFF7;  /* Light blue */
+      border: 2px solid white;
+      border-radius: 8px;
+      position: relative;  /* To position the number correctly */
+    }
+    
+    
+    /* Style for the numbers inside the selected cells */
+    .selected-num {
+      position: absolute;
+      top: 50%;
+      right: 10px;   /* Adjusted this from left to right and gave it a 10px offset from the right edge */
+      transform: translateY(-50%);   /* Only need to adjust the Y-axis since we're not centering horizontally anymore */
+      font-weight: bold;
+      font-size: 18px;
+    }
+    
+
+    button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      background-color: #007bff;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    button.confirm {
+      background-color: #1aa617;
+    }
+
+    button.confirm:hover {
+      background-color: #21d41e;
+    }
+
+    button.submitted {
+      background-color: #edba00; /* New color */
+    }
+
+    button.submitted:hover {
+      background-color: #f5cb05; /* New hover color */
+    }
+  </style>
+  <h1>Round 1 Pairings</h1>
+
+  
+
+  {% set sorted_categories = pairings.keys() | sort %}
+  {% for category in sorted_categories %}
+    {% set pairings_category = pairings[category] %}
+    <h2>Sprint {{ category }}</h2>
+    <div class="table-container">
+      <table class="table" id="sprint{{ category }}Table">
+      <thead>
+        <tr>
+          <th class="heat">Heat</th>
+          <th class="rider-1">Rider 1</th>
+          <th class="col-v"></th>
+          <th class="rider-2">Rider 2</th>
+          <th class="col-v"></th>
+          <th class="rider-3">Rider 3</th>
+          <th class="submit">Submit Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pairing in pairings_category %}
+          <tr>
+            <td class="heat">Heat {{ loop.index }}</td>
+            {% if pairing.pairing[0] != "BYE" %}
+              <td class="rider-1" onclick="selectRider(this, 'sprint{{ category }}Table')">
+                {{ pairing.pairing[0] }}
+              </td>
+            {% else %}
+              <td class="rider-1"></td>
+            {% endif %}
+            <td class="col-v">V</td>
+            {% if pairing.pairing[1] != "BYE" %}
+              <td class="rider-2" onclick="selectRider(this, 'sprint{{ category }}Table')">
+                {{ pairing.pairing[1] }}
+              </td>
+            {% else %}
+              <td class="rider-2"></td>
+            {% endif %}
+            <td class="col-v">V</td>
+            {% if pairing.pairing|length > 2 %}
+              {% if pairing.pairing[2] != "BYE" %}
+                <td class="rider-3" onclick="selectRider(this, 'sprint{{ category }}Table')">
+                  {{ pairing.pairing[2] }}
+                </td>
+              {% else %}
+                <td class="rider-3"></td>
+              {% endif %}
+            {% else %}
+              <td class="rider-3"></td>
+            {% endif %}
+            <td class="submit">
+              <button type="button" onclick="confirmResult(this)">Submit</button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endfor %}
+
+<script>
+  function selectRider(tdElement, tableID) {
+    var alreadySelected = tdElement.parentNode.querySelectorAll('.selected-1, .selected-2');
+    
+    if (tdElement.classList.contains('selected-1') || tdElement.classList.contains('selected-2')) {
+        tdElement.classList.remove('selected-1', 'selected-2');
+        let numberElement = tdElement.querySelector('.selected-num');
+        if (numberElement) {
+            tdElement.removeChild(numberElement);
+        }
+
+        // Removing selection, update localStorage
+        updateLocalStorage(tdElement, tableID, true);
+        return;
+        console.log(`updateLocalStorage: ${storageKey}`, { isRemoving, selectedRiders }); // Log what is being stored/removed
+
+    }
+    
+    if (alreadySelected.length === 2) {
+      alreadySelected[0].classList.remove('selected-1', 'selected-2');
+      let numberElement = alreadySelected[0].querySelector('.selected-num');
+      if (numberElement) {
+          alreadySelected[0].removeChild(numberElement);
+      }
+    }
+
+    let selectedClass = alreadySelected.length === 1 ? 'selected-2' : 'selected-1';
+    tdElement.classList.add(selectedClass);
+
+    let numberElement = document.createElement('span');
+    numberElement.classList.add('selected-num');
+    numberElement.textContent = selectedClass === 'selected-1' ? '1' : '2';
+    tdElement.appendChild(numberElement);
+
+    var submitButton = tdElement.parentNode.querySelector('button');
+    if (submitButton.innerHTML === "Confirm" || submitButton.innerHTML === "Submitted") {
+      submitButton.innerHTML = "Submit";
+      submitButton.classList.remove("confirm");
+      submitButton.classList.remove("submitted");
+    }
+
+    // New selection, update localStorage
+    updateLocalStorage(tdElement, tableID, false);
+  }
+
+  function updateLocalStorage(tdElement, tableID, isRemoving) {
+    const heatNumber = tdElement.parentNode.querySelector(".heat").textContent;
+    const selectedRiders = Array.from(tdElement.parentNode.querySelectorAll('.selected-1, .selected-2'))
+        .map(cell => cell.textContent.trim());
+
+    const storageKey = `${tableID}-${heatNumber}`;
+    if (isRemoving) {
+        localStorage.removeItem(storageKey);
+    } else {
+        localStorage.setItem(storageKey, JSON.stringify(selectedRiders));
+    }
+  }
+
+  window.onload = function() {
+    const tables = document.querySelectorAll('.table');
+
+    tables.forEach(table => {
+        const tableID = table.id;
+        table.querySelectorAll('tbody tr').forEach(row => {
+            const heatNumber = row.querySelector(".heat").textContent;
+            const storageKey = `${tableID}-${heatNumber}`;
+            const savedSelection = JSON.parse(localStorage.getItem(storageKey));
+
+            if (savedSelection && savedSelection.length > 0) {
+                row.querySelectorAll('.rider-1, .rider-2, .rider-3').forEach(cell => {
+                    const riderName = cell.textContent.trim();
+                    if (savedSelection.includes(riderName)) {
+                        selectRider(cell, tableID);
+                        console.log(`window.onload: ${storageKey}`, { savedSelection }); // Log what is being loaded from storage
+                      }
+                });
+            }
+        });
+    });
+  };
+
+  function confirmResult(button) {
+    const selectedCells = Array.from(button.parentNode.parentNode.querySelectorAll('.selected-1, .selected-2'));
+    const allRiderCellsInRow = Array.from(button.parentNode.parentNode.querySelectorAll('.rider-1, .rider-2, .rider-3'));
+    const nonEmptyRiderCells = allRiderCellsInRow.filter(cell => cell.textContent.trim() !== "");
+    
+
+// Determine how many riders should be selected
+console.log("nonEmptyRiderCells:", nonEmptyRiderCells);
+let requiredSelectionCount = nonEmptyRiderCells.length === 3 ? 2 : nonEmptyRiderCells.length;
+
+if (selectedCells.length !== requiredSelectionCount) {
+    if (requiredSelectionCount === 1) {
+        alert("Please select the rider for this heat.");
+        return;
+    } else {
+        alert(`Please select ${requiredSelectionCount} riders.`);
+        return;
+    }
+}
+
+    
+    // The rest of the code for submitting remains unchanged
+    if (button.innerHTML === "Submit") {
+        button.innerHTML = "Confirm";
+        button.classList.add("confirm");
+    } else if (button.innerHTML === "Confirm") {
+        // Get the selected riders' names and heat number
+        const heatNumber = button.parentNode.parentNode.querySelector(".heat").textContent;
+        const selectedRider1 = selectedCells[0].textContent.trim();
+        const selectedRider2 = selectedCells.length === 2 ? selectedCells[1].textContent.trim() : 'BYE';
+
+        // Perform an AJAX request to update the database
+        fetch('/update_round1_seeding_female', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                heatNumber: heatNumber,
+                selectedRider1: selectedRider1,
+                selectedRider2: selectedRider2
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                button.innerHTML = "Submitted";
+                button.classList.remove("confirm");
+                button.classList.add("submitted");
+            } else {
+                alert("Failed to update seeding. Please try again.");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+}
+</script>
+
+
+{% endblock %}

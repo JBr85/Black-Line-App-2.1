@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Race Schedule{% endblock %}
+
+{% block content %}
+<h2>Race Schedule</h2>
+
+{% if current_race %}
+  <h3>Current Race</h3>
+  <p>Race Number: {{ current_race.race_number }}</p>
+  <p>Date: {{ current_race.date }}</p>
+  <p>Time: {{ current_race.time }}</p>
+  <p>Location: {{ current_race.location }}</p>
+  <p>Race Type: {{ current_race.race_type }}</p>
+{% endif %}
+
+{% if upcoming_races %}
+  <h3>Upcoming Races</h3>
+  <ul>
+    {% for race in upcoming_races %}
+      <li>Race Number: {{ race.race_number }} | Date: {{ race.date }} | Time: {{ race.time }}</li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No upcoming races</p>
+{% endif %}
+{% endblock %}

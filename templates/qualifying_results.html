@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block title %}Qualifying Results{% endblock %}
+
+{% block content %}
+<!-- Print Results Button -->
+<button onclick="generate_and_upload()" class="print-button">Generate PDF & Upload to Dropbox</button>
+
+<!-- Logo for Printing -->
+<img src="{{ url_for('uploaded_logo', filename='logo.png') }}" alt="Black Line Logo" class="logo">
+
+<!-- Male Riders Section -->
+<div class="print-section">
+  <img src="{{ url_for('uploaded_logo', filename='logo.png') }}" alt="Black Line Logo" class="logo">
+  <h3>Black Line Open Qualifying</h3>
+  <div class="table-responsive">
+    <table class="table male-riders-table">
+      <thead>
+        <tr>
+          <th>Position</th>
+          <th>Number</th>
+          <th>Name</th>
+          <th>Club</th>
+          <th>Race Qualified</th>
+          <th>Time</th>
+          <th>Time Difference</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rider in male_riders_signedon %}
+          {% if rider.qualifying_time is defined and rider.qualifying_time != '' %}
+            <tr>
+              <td>{{ rider.seeding }}</td>
+              <td>{{ rider.rider_number }}</td>
+              <td>{{ rider.rider_name }}</td>
+              <td>{{ rider.rider_club }}</td>
+              <td>{{ rider.sprint_category }}</td>
+              <td>{{ "%0.3f"|format(rider.qualifying_time|float) }}</td>
+              <td>
+                {% if rider.seeding|int > 1 %}
+                  {{ "+%0.3f"|format(rider.qualifying_time|float - male_riders_signedon[0].qualifying_time|float) }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Page break for Female Sprint -->
+  <div class="print-section" style="page-break-before: always;">
+    <img src="{{ url_for('uploaded_logo', filename='logo.png') }}" alt="Black Line Logo" class="logo">
+    <h3>Black Line Female Open Qualifying</h3>
+    <div class="table-responsive">
+      <table class="table female-riders-table">
+      <thead>
+        <tr>
+          <th>Position</th>
+          <th>Number</th>
+          <th>Name</th>
+          <th>Club</th>
+          <th>Race Qualified</th>
+          <th>Time</th>
+          <th>Time Difference</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rider in female_riders_signedon %}
+          {% if rider.qualifying_time is defined and rider.qualifying_time != '' %}
+            <tr>
+              <td>{{ rider.seeding }}</td>
+              <td>{{ rider.rider_number }}</td>
+              <td>{{ rider.rider_name }}</td>
+              <td>{{ rider.rider_club }}</td>
+              <td>{{ rider.sprint_category }}</td>
+              <td>{{ "%0.3f"|format(rider.qualifying_time|float) }}</td>
+              <td>
+                {% if rider.seeding|int > 1 %}
+                  {{ "+%0.3f"|format(rider.qualifying_time|float - female_riders_signedon[0].qualifying_time|float) }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  /* Custom styles for the table */
+  /* Rest of the CSS styles */
+
+  .logo {
+    display: none;
+  }
+
+  .print-button {
+    display: block;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .print-button:hover {
+    background-color: #0056b3;
+  }
+
+  /* Customizable Header Banner for Printing */
+  @media print {
+    .logo {
+      max-width: 150px;
+      display: block;
+      position: absolute;
+      top: 0; /* Position logo at the top */
+      right: 0;
+      page-break-inside: avoid; /* Prevent page break inside the logo element */
+    }
+  
+      .print-section {
+          margin-bottom: 160px; /* Adjust this to accommodate the logo's height */
+          position: relative; /* Ensure the relative positioning for absolute child elements */
+      }
+  
+  
+      .print-header-banner {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100px; /* Adjust height as needed */
+          background-color: white; /* Or any other color you want */
+          z-index: 9999; /* Make sure it's above other content */
+          display: none; /* Initially hidden */
+      }
+  
+      .print-header-banner .header-text {
+          float: left;
+          margin-top: 20px; /* Adjust margin as needed */
+          margin-left: 20px;
+          font-size: 20px; /* Adjust font size as needed */
+          font-weight: bold; /* Make it bold if desired */
+      }
+  
+      .print-header, 
+      .print-button {
+          display: none !important;
+      }
+  
+      /* Ensure table starts after the header banner */
+      .table {
+          margin-top: 100px; /* Same as the height of the header banner */
+      }
+  
+      /* Ensure the header banner only appears on each page */
+      .print-header-banner::before {
+          content: ""; /* Empty content to clear default content */
+          display: block;
+          clear: both; /* Clear any floats */
+      }
+  
+      .print-header-banner::after {
+          content: ""; /* Empty content to clear default content */
+          display: block;
+          clear: both; /* Clear any floats */
+      }
+  
+      /* Ensure the header banner forces a page break after it */
+      .print-header-banner {
+          page-break-before: always;
+      }
+  }
+</style>
+
+<script>
+  function generate_and_upload() {
+    const maleRiders = [];
+    const femaleRiders = [];
+
+    // Fetching Male Riders Data
+    document.querySelectorAll('.male-riders-table tbody tr').forEach(row => {
+      const columns = row.querySelectorAll('td');
+      maleRiders.push({
+        seeding: columns[0].innerText,
+        rider_number: columns[1].innerText,
+        rider_name: columns[2].innerText,
+        rider_club: columns[3].innerText,
+        sprint_category: columns[4].innerText,
+        qualifying_time: columns[5].innerText,
+        time_difference: columns[6].innerText
+      });
+    });
+
+    // Fetching Female Riders Data
+    document.querySelectorAll('.female-riders-table tbody tr').forEach(row => {
+      const columns = row.querySelectorAll('td');
+      femaleRiders.push({
+        seeding: columns[0].innerText,
+        rider_number: columns[1].innerText,
+        rider_name: columns[2].innerText,
+        rider_club: columns[3].innerText,
+        sprint_category: columns[4].innerText,
+        qualifying_time: columns[5].innerText,
+        time_difference: columns[6].innerText
+      });
+    });
+
+    const data = {
+      male_riders: maleRiders,
+      female_riders: femaleRiders
+    };
+
+    console.log("Sending data to server:", data);
+
+    fetch('/generate_and_upload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+    .then(response => {
+      console.log("Response from server:", response);
+      return response.json();
+    })
+    .then(data => {
+      console.log("Data from server:", data);
+      if (data.success) {
+        alert(data.message);
+      } else {
+        alert("Error: " + data.message);
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert("Error: " + error);
+    });
+  }
+
+  window.addEventListener('load', function() {
+    adjustRowsPerPage();
+    adjustLogoPosition(); // Adjust logo position on load
+  });
+
+  // Listen for page break events to adjust logo position
+  window.onbeforeprint = function() {
+    setTimeout(adjustLogoPosition, 0); // Using setTimeout to wait for the page break
+  };
+
+  function adjustRowsPerPage() {
+    var maleRows = document.querySelectorAll('.male-riders-table tbody tr');
+    var femaleRows = document.querySelectorAll('.female-riders-table tbody tr');
+    var headerHeight = document.querySelector('.print-header').offsetHeight;
+    var paddingBelowHeader = 30;
+  
+    var totalHeightMale = 0;
+    maleRows.forEach(function(row) {
+        totalHeightMale += row.offsetHeight;
+    });
+  
+    var totalHeightFemale = 0;
+    femaleRows.forEach(function(row) {
+        totalHeightFemale += row.offsetHeight;
+    });
+  
+    var maxHeightMale = 20 * (totalHeightMale / maleRows.length);
+    var maxHeightFemale = 20 * (totalHeightFemale / femaleRows.length);
+  
+    var combinedHeight = maxHeightMale + maxHeightFemale + headerHeight + paddingBelowHeader;
+  
+    document.querySelector('.print-section').style.height = combinedHeight + 'px';
+  }
+
+  function adjustLogoPosition() {
+    var logo = document.querySelector('.logo');
+    var maleContentHeight = document.querySelector('.print-section:nth-child(1)').offsetHeight;
+    var femaleContentHeight = document.querySelector('.print-section:nth-child(2)').offsetHeight;
+    var maleTableHeight = document.querySelector('.male-riders-table').offsetHeight;
+    var femaleTableHeight = document.querySelector('.female-riders-table').offsetHeight;
+    var logoHeight = logo.offsetHeight;
+    var windowHeight = window.innerHeight;
+
+    var newTopMale = maleContentHeight - logoHeight; // Adjusting logo to top
+    var newTopFemale = femaleContentHeight - logoHeight; // Adjusting logo to top
+
+    // Log to check the heights
+    console.log("Male Content Height:", maleContentHeight);
+    console.log("Female Content Height:", femaleContentHeight);
+
+    // Adjusting the logo's position for Male Riders section
+    if (maleContentHeight + logoHeight > windowHeight && maleTableHeight + logoHeight > windowHeight) {
+        logo.style.top = newTopMale + 'px';
+    }
+
+    // Adjusting the logo's position for Female Sprint section
+    if (femaleContentHeight + logoHeight > windowHeight && femaleTableHeight + logoHeight > windowHeight) {
+        logo.style.top = newTopFemale + 'px';
+    }
+}
+</script>
+
+
+{% endblock %}

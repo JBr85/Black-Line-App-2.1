@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Quarter Final Pairings{% endblock %}
+
+{% block content %}
+
+  <style>
+    /* Custom styles for the table */
+    table.table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    table.table thead {
+      background-color: #f8f9fa;
+    }
+
+    table.table th,
+    table.table td {
+      padding: 8px;
+      text-align: center;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    table.table th.col-v,
+    table.table td.col-v,
+    table.table th.col-rider-2,
+    table.table td.col-rider-2,
+    table.table th.col-rider-3,
+    table.table td.col-rider-3 {
+      padding-left: 4px; /* Adjust as necessary */
+      margin-left: 0px; /* Adjust as necessary */
+    }
+
+    table.table th {
+      font-weight: bold;
+    }
+
+    table.table td {
+      vertical-align: top;
+    }
+
+    table.table td.rider-1,
+    table.table td.rider-2,
+    table.table td.rider-3 {
+      text-align: center;
+    }
+
+    .selected-1 {
+      background-color: #A8E6CF;  /* Modern light green */
+      border: 2px solid white;
+      border-radius: 8px;
+      position: relative;  /* To position the number correctly */
+    }
+    
+    .selected-2 {
+      background-color: #AEDFF7;  /* Light blue */
+      border: 2px solid white;
+      border-radius: 8px;
+      position: relative;  /* To position the number correctly */
+    }
+    
+    
+    /* Style for the numbers inside the selected cells */
+    .selected-num {
+      position: absolute;
+      top: 50%;
+      right: 10px;   /* Adjusted this from left to right and gave it a 10px offset from the right edge */
+      transform: translateY(-50%);   /* Only need to adjust the Y-axis since we're not centering horizontally anymore */
+      font-weight: bold;
+      font-size: 18px;
+    }
+    
+
+    button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      background-color: #007bff;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    button.confirm {
+      background-color: #1aa617;
+    }
+
+    button.confirm:hover {
+      background-color: #21d41e;
+    }
+
+    button.submitted {
+      background-color: #edba00; /* New color */
+    }
+
+    button.submitted:hover {
+      background-color: #f5cb05; /* New hover color */
+    }
+  </style>
+
+  <h1>Quarter Finals</h1>
+  
+  {% set sorted_categories = quarter_finals.keys() | sort %}
+  {% for sprint_category in sorted_categories %}
+  {% set heats = quarter_finals[sprint_category] %}
+  
+  <!-- Checking if we should display "Straight to Semi Finals" -->
+  {% if heats == "Straight to Semi Finals" %}
+      <h2>Sprint Category {{ sprint_category }}: Winners Straight to Semi Finals, Remainder to Rep</h2>
+  {% else %}
+      <!-- Otherwise display the repechage sprint table -->
+      <h2>Quarter Final Sprint {{ sprint_category }}</h2>
+      <div class="table-container">
+          <table class="table" id="QuarterFinals{{ sprint_category }}Table">
+              <thead>
+                  <tr>
+                      <th class="heat">Heat</th>
+                      <th class="rider-1">Rider 1</th>
+                      <th class="col-v"></th>
+                      <th class="rider-2">Rider 2</th>
+                      <th class="col-v"></th>
+                      <th class="rider-3">Rider 3</th>
+                      <th class="submit">Submit Result</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for heat, riders in heats.items() %}
+                  <tr>
+                      <td class="heat">Heat {{ loop.index }}</td>
+  
+                      {% for rider in riders %}
+                      {% if rider != "BYE" %}
+                      <td onclick="selectRider(this, 'QuarterFinal{{ sprint_category }}Table')">
+                          {{ rider }}
+                      </td>
+                      {% else %}
+                      <td></td>
+                      {% endif %}
+  
+                      {% if not loop.last %}
+                      <td class="col-v">V</td>
+                      {% endif %}
+                      {% endfor %}
+  
+                      <!-- Skip cells if there are less than 3 riders -->
+                      {% for _ in range(riders|length, 3) %}
+                      <td></td>
+                      <td></td>
+                      {% endfor %}
+  
+                      <td class="submit">
+                          <button type="button" onclick="confirmResult(this)">Submit</button>
+                      </td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+      </div>
+  {% endif %}
+  {% endfor %}
+  
+  <script>
+    function selectRider(tdElement, tableID) {
+        var alreadySelected = tdElement.parentNode.querySelectorAll('.selected-1, .selected-2');
+      
+        if (tdElement.classList.contains('selected-1') || tdElement.classList.contains('selected-2')) {
+            tdElement.classList.remove('selected-1', 'selected-2');
+            let numberElement = tdElement.querySelector('.selected-num');
+            if (numberElement) {
+                tdElement.removeChild(numberElement);
+            }
+            return;
+        }
+      
+        if (alreadySelected.length === 2) {
+            alreadySelected[0].classList.remove('selected-1', 'selected-2');
+            let numberElement = alreadySelected[0].querySelector('.selected-num');
+            if (numberElement) {
+                alreadySelected[0].removeChild(numberElement);
+            }
+        }
+  
+        let selectedClass = alreadySelected.length === 1 ? 'selected-2' : 'selected-1';
+        tdElement.classList.add(selectedClass);
+  
+        let numberElement = document.createElement('span');
+        numberElement.classList.add('selected-num');
+        numberElement.textContent = selectedClass === 'selected-1' ? '1' : '2';
+        tdElement.appendChild(numberElement);
+  
+        var submitButton = tdElement.parentNode.querySelector('button');
+        if (submitButton.innerHTML === "Confirm" || submitButton.innerHTML === "Submitted") {
+            submitButton.innerHTML = "Submit";
+            submitButton.classList.remove("confirm");
+            submitButton.classList.remove("submitted");
+        }
+    }
+  
+    function confirmResult(button) {
+      const selectedCells = Array.from(button.parentNode.parentNode.querySelectorAll('.selected-1, .selected-2'));
+      const allRiderCellsInRow = Array.from(button.parentNode.parentNode.querySelectorAll('td:not(.submit, .col-v, .heat)'));
+      const nonEmptyRiderCells = allRiderCellsInRow.filter(cell => cell.textContent.trim() !== "");
+      
+      console.log("All rider cells:", allRiderCellsInRow.map(cell => cell.textContent.trim()));
+      console.log("Non-empty rider cells:", nonEmptyRiderCells.map(cell => cell.textContent.trim()));
+      console.log("Selected cells:", selectedCells.map(cell => cell.textContent.trim()));
+      console.log("Number of non-empty cells:", nonEmptyRiderCells.length);
+  
+      let requiredSelectionCount = nonEmptyRiderCells.length === 3 ? 2 : nonEmptyRiderCells.length;
+      
+      console.log("Required selection count:", requiredSelectionCount);
+      console.log("Actual selected count:", selectedCells.length);
+      
+      if (selectedCells.length !== requiredSelectionCount) {
+          alert(`Please select ${requiredSelectionCount} riders.`);
+          return;
+      }
+      
+        if (button.innerHTML === "Submit") {
+            button.innerHTML = "Confirm";
+            button.classList.add("confirm");
+        } else if (button.innerHTML === "Confirm") {
+            const heatNumber = button.parentNode.parentNode.querySelector(".heat").textContent;
+            const selectedRider1 = selectedCells[0].textContent.trim();
+            const selectedRider2 = selectedCells.length === 2 ? selectedCells[1].textContent.trim() : 'BYE';
+
+            fetch('/submit_quarter_final_results_female', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    heatNumber: heatNumber,
+                    selectedRider1: selectedRider1,
+                    selectedRider2: selectedRider2
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    button.innerHTML = "Submitted";
+                    button.classList.remove("confirm");
+                    button.classList.add("submitted");
+                } else {
+                    alert("Failed to update seeding. Please try again.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    }
+</script>
+
+{% endblock %}

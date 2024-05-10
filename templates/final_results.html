@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Final Results{% endblock %}
+
+{% block content %}
+<h2>Final Results</h2>
+
+<img src="{{ url_for('uploaded_logo', filename='logo.png') }}" alt="Black Line Coaching Logo" class="logo">
+
+<h3>Male Riders</h3>
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Sprint</th>
+        <th>Final Position</th>
+        <th>Rider Name</th>
+        <th>Rider Club</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rider in riders_male_final %}
+        {% if rider.final_result is defined and rider.final_result != '' %}
+          <tr>
+            <td>{{ rider.sprint_category }}</td>
+            <td>
+              {% if rider.final_result|int == 1 %}
+                <span class="position gold">1</span>
+              {% elif rider.final_result|int == 2 %}
+                <span class="position silver">2</span>
+              {% elif rider.final_result|int == 3 %}
+                <span class="position bronze">3</span>
+              {% else %}
+                <span class="position white-bg">{{ rider.final_result|int }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if rider.final_result|int <= 3 %}
+                <b>{{ rider.rider_name }}</b>  <!-- Apply bold style to rider name for top 3 riders -->
+              {% else %}
+                {{ rider.rider_name }}  <!-- Otherwise, render rider name as is -->
+              {% endif %}
+            </td>
+            <td>
+              {% if rider.final_result|int <= 3 %}
+                <b>{{ rider.rider_club }}</b>  <!-- Apply bold style to rider club for top 3 riders -->
+              {% else %}
+                {{ rider.rider_club }}  <!-- Otherwise, render rider club as is -->
+              {% endif %}
+            </td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h3>Female Riders</h3>
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Sprint</th>
+        <th>Final Position</th>
+        <th>Rider Name</th>
+        <th>Rider Club</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rider in riders_female_final %}
+        {% if rider.final_result is defined and rider.final_result != '' %}
+          <tr>
+            <td>{{ rider.sprint_category }}</td>
+            <td>
+              {% if rider.final_result|int == 1 %}
+                <span class="position gold">1</span>
+              {% elif rider.final_result|int == 2 %}
+                <span class="position silver">2</span>
+              {% elif rider.final_result|int == 3 %}
+                <span class="position bronze">3</span>
+              {% else %}
+                <span class="position white-bg">{{ rider.final_result|int }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if rider.final_result|int <= 3 %}
+                <b>{{ rider.rider_name }}</b>  <!-- Apply bold style to rider name for top 3 riders -->
+              {% else %}
+                {{ rider.rider_name }}  <!-- Otherwise, render rider name as is -->
+              {% endif %}
+            </td>
+            <td>
+              {% if rider.final_result|int <= 3 %}
+                <b>{{ rider.rider_club }}</b>  <!-- Apply bold style to rider club for top 3 riders -->
+              {% else %}
+                {{ rider.rider_club }}  <!-- Otherwise, render rider club as is -->
+              {% endif %}
+            </td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  /* Custom styles for the table */
+  /* Rest of the CSS styles */
+
+  .logo {
+    float: right;
+    max-width: 150px;
+    margin-top: -50px;
+    margin-right: 20px;
+  }
+
+  .position {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 50%; /* Circle shape */
+  }
+
+  .gold {
+    background-color: gold;
+    color: black; /* Choose appropriate text color for better contrast */
+    font-weight: bold;
+  }
+
+  .silver {
+    background-color: silver;
+    color: black; /* Choose appropriate text color for better contrast */
+    font-weight: bold;
+  }
+
+  .bronze {
+    background-color: #cd7f32; /* Bronze color */
+    color: black; /* Choose appropriate text color for better contrast */
+    font-weight: bold;
+  }
+
+  /* Ensure other final positions have a white background */
+  .white-bg {
+    background-color: white;
+    font-weight: normal; /* Reset font weight for non-bold numbers */
+  }
+</style>
+
+
+{% endblock %}

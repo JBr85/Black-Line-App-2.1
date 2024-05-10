@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Sign On - Male Riders{% endblock %}
+
+{% block content %}
+<h2>Male Riders</h2>
+
+<form method="post" action="/signon_male">
+
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Rider Number</th>
+        <th>Rider Name</th>
+        <th>Rider Club</th>
+        <th>Signed On?</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rider in male_riders %}
+      <tr>
+        <td>{{ rider['Rider Number'] }}</td>
+        <td>{{ rider['Rider Name'] }}</td>
+        <td>{{ rider['Rider Club'] }}</td>
+        <td>
+          <select name="male_riders_signon[{{ rider['Rider Number'] }}]" class="form-control">
+            <option value="Yes" {% if rider['Signed_On'] == 'Yes' %}selected{% endif %}>Yes</option>
+            <option value="No" {% if rider['Signed_On'] == 'No' %}selected{% endif %}>No</option>
+          </select>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<input type="submit" value="Submit" class="btn btn-primary mt-3">
+</form>
+
+<style>
+  /* Custom styles for the table */
+  table.table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  table.table thead {
+    background-color: #f8f9fa;
+  }
+
+  table.table th,
+  table.table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  table.table th {
+    font-weight: bold;
+  }
+
+  table.table td {
+    vertical-align: top;
+  }
+
+  .mt-3 {
+    margin-top: 1rem;
+  }
+</style>
+{% endblock %}

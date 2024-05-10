@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-6">
+      <h1>Black line Race Day App</h1>
+
+      <form method="POST" action="/submit" enctype="multipart/form-data">
+        <h3>Upload CSV file for Male Riders:</h3>
+        <input class="btn btn-outline-primary" type="file" id="male-csv" name="male_csv" />
+        <h3>&nbsp;</h3>
+
+        <h3>Upload CSV file for Female Riders:</h3>
+        <input class="btn btn-outline-primary" type="file" id="female-csv" name="female_csv" />
+        <h3>&nbsp;</h3>
+
+        <input class="btn btn-primary" type="submit" value="Submit Rider Forms" />
+      </form>
+    </div>
+
+    <div class="col-md-6">
+      <h2>Upload Logo:</h2>
+      <form action="/upload_logo" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="logo">Select Logo:</label>
+          <input type="file" name="logo" class="form-control-file" id="logo" accept=".png, .jpg, .jpeg">
+        </div>
+        <input type="submit" value="Upload" class="btn btn-primary">
+      </form>
+      
+      <h2>Uploaded Logo:</h2>
+      {% with logo_filename = session.get('logo_filename') %}
+        {% if logo_filename %}
+          <img src="{{ url_for('static', filename='uploads/' + logo_filename) }}" alt="Uploaded Logo">
+        {% endif %}
+      {% endwith %}
+      
+      <h2>Select Printer:</h2>
+      <form method="POST" action="/">
+        <div class="form-group">
+          <label for="printer">Select Printer:</label>
+          <select name="printer" class="form-control" id="printer">
+            {% for printer in printers %}
+              <option value="{{ printer }}">{{ printer }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <input type="submit" value="Set Printer" class="btn btn-primary">
+      </form>
+    
+      
+      {% with selected_printer = session.get('selected_printer') %}
+        {% if selected_printer %}
+          <h3>Selected Printer: {{ selected_printer }}</h3>
+        {% endif %}
+      {% endwith %}
+    </div>
+  </div>
+{% endblock %}

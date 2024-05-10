@@ -1,0 +1,39 @@
+<table class="table" id="sprint{{ category }}Table">
+    <thead>
+        <tr>
+            <th class="heat">Heat</th>
+            <th class="rider-1">Rider 1</th>
+            <th class="col-v"></th>
+            <th class="rider-2">Rider 2</th>
+            <th class="col-v"></th>
+            <th class="rider-3">Rider 3</th>
+            <th class="submit">Submit Result</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pairing in pairings_category %}
+            <tr>
+                <td class="heat">Heat {{ loop.index }}</td>
+                <td class="rider-1" onclick="selectRider(this, 'sprint{{ category }}Table')">
+                    {{ pairing.pairing[0] if pairing.pairing[0] != "BYE" else "BYE" }}
+                </td>
+                <td class="col-v">V</td>
+                <td class="rider-2" onclick="selectRider(this, 'sprint{{ category }}Table')">
+                    {{ pairing.pairing[1] if pairing.pairing[1] != "BYE" else "BYE" }}
+                </td>
+                {% if pairing.pairing|length > 2 %}
+                    <td class="col-v">V</td>
+                    <td class="rider-3" onclick="selectRider(this, 'sprint{{ category }}Table')">
+                        {{ pairing.pairing[2] if pairing.pairing[2] != "BYE" else "BYE" }}
+                    </td>
+                {% else %}
+                    <td class="col-v"></td>
+                    <td class="rider-3"></td>
+                {% endif %}
+                <td class="submit">
+                    <button type="button" onclick="confirmResult(this)">Submit</button>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
